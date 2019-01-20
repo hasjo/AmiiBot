@@ -11,7 +11,7 @@ def ingest_file(attachobj, username, nickname):
     filename = attachobj['filename']
     url = attachobj['url']
     reqobj = requests.get(url, stream=True)
-    filename = 'amiibo/' + str(username) + '-' + nickname + '.bin'
+    filename = 'amiibo/' + str(username.id) + '-' + nickname + '.bin'
     outstring = b''
     with open(filename, 'wb') as writefile:
         for chunk in reqobj.iter_content(chunk_size=50):
@@ -69,8 +69,9 @@ async def on_message(message):
                 try:
                     to_send = splitlist[2]
                     recipient = message.mentions[0]
-                    filename = 'amiibo/' + str(message.author) + '-' + to_send + '.bin'
-                    await client.send_file(recipient, filename)
+                    filename = 'amiibo/' + str(message.author.id) + '-' + to_send + '.bin'
+                    sendname = str(message.author) + '-' + to_send + '.bin'
+                    await client.send_file(recipient, filename, filename=sendname)
                     await client.send_message(message.channel, 'Successfully sent {} to {}'.format(to_send, str(recipient)))
                 except Exception as exc:
                     print(exc)
@@ -88,8 +89,9 @@ async def on_message(message):
             else:
                 try:
                     for amiibo in amiilist:
-                        filename = 'amiibo/' + str(message.author) + '-' + amiibo + '.bin'
-                        await client.send_file(message.author, filename)
+                        filename = 'amiibo/' + str(message.author.id) + '-' + amiibo + '.bin'
+                        sendname = str(message.author) + '-' + amiibo + '.bin'
+                        await client.send_file(message.author, filename, filename=sendname)
                 except Exception as exc:
                     print(exc)
                     await client.send_message(message.channel, 'Failed to Download')

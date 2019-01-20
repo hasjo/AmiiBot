@@ -4,6 +4,8 @@ import asyncio
 import requests
 import creds
 
+STORAGE_DIR = '/amiibo/'
+
 client = discord.Client()
 
 def ingest_file(attachobj, username, nickname):
@@ -11,7 +13,7 @@ def ingest_file(attachobj, username, nickname):
     filename = attachobj['filename']
     url = attachobj['url']
     reqobj = requests.get(url, stream=True)
-    filename = 'amiibo/' + str(username.id) + '-' + nickname + '.bin'
+    filename = STORAGE_DIR + str(username.id) + '-' + nickname + '.bin'
     outstring = b''
     with open(filename, 'wb') as writefile:
         for chunk in reqobj.iter_content(chunk_size=50):
@@ -47,7 +49,7 @@ async def on_message(message):
             if message.attachments:
                 attach = message.attachments[0]
                 if attach['size'] in [572, 540, 532] and attach['filename'].endswith('bin'):
-                    nick = cont.split()[1]
+                    nick = '_'.join(cont.split()[1:])
                     try:
                         ingest_file(attach, message.author, nick)
                         await client.send_message(message.channel, 'Successfully stored - ' + nick)
@@ -61,37 +63,35 @@ async def on_message(message):
 
 
         if cont.startswith('!send'):
-            print("{} - {}".format(message.author, cont))
+            print("{} - {}".format(str(message.author), cont))
             splitlist = cont.split()
-            if len(splitlist) != 3:
+            if len(splitlist) < 3:
                 await client.send_message(message.channel, 'Improper send command, please format it like: `!send <@usertag> <amiibonickname>`')
             else:
                 try:
-                    to_send = splitlist[2]
+                    to_send = '_'.join(splitlist[2:])
                     recipient = message.mentions[0]
-                    filename = 'amiibo/' + str(message.author.id) + '-' + to_send + '.bin'
+                    filename = STORAGE_DIR + str(message.author.id) + '-' + to_send + '.bin'
                     sendname = str(message.author) + '-' + to_send + '.bin'
                     await client.send_file(recipient, filename, filename=sendname)
                     await client.send_message(message.channel, 'Successfully sent {} to {}'.format(to_send, str(recipient)))
                 except Exception as exc:
                     print(exc)
                     await client.send_message(message.channel, 'Failed to Send')
+                    raise exc
 
 
         if cont.startswith('!download'):
             print("{} - {}".format(message.author, cont))
             splitlist = cont.split()
-            amiilist = splitlist[1:]
-            if len(amiilist) > 3:
-                await client.send_message(message.channel, 'For rate limiting reasons, you are only able to download three amiibo at a time')
-            elif len(amiilist) == 0:
+            amiiname = '_'.join(splitlist[1:])
+            if len(splitlist) == 1:
                 await client.send_message(message.channel, 'No nickname defined, please try again')
             else:
                 try:
-                    for amiibo in amiilist:
-                        filename = 'amiibo/' + str(message.author.id) + '-' + amiibo + '.bin'
-                        sendname = str(message.author) + '-' + amiibo + '.bin'
-                        await client.send_file(message.author, filename, filename=sendname)
+                    filename = STORAGE_DIR + str(message.author.id) + '-' + amiiname + '.bin'
+                    sendname = str(message.author) + '-' + amiiname + '.bin'
+                    await client.send_file(message.author, filename, filename=sendname)
                 except Exception as exc:
                     print(exc)
                     await client.send_message(message.channel, 'Failed to Download')

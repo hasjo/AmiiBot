@@ -1,10 +1,14 @@
-import discord
-import os
 import asyncio
+import logging
+import os
+import discord
 import requests
 import creds
 
 STORAGE_DIR = '/amiibo/'
+logging.basicConfig(format='%(levelname)s:%(message)s',
+                    filename=STORAGE_DIR+'log.log',
+                    level=logging.INFO)
 
 client = discord.Client()
 
@@ -37,7 +41,7 @@ async def on_message(message):
         cont = message.content.lower()
 
         if cont.startswith('!help'):
-            print("{} - {}".format(message.author, cont))
+            logging.info("{} - {}".format(message.author, cont))
             retmsg = ("This is the AmiiBot help menu!\n"
                       "`!store <amiibo nickname>` (and attach the bin)\n"
                       "`!send <Tag the host> <amiibo nickname>`\n"
@@ -45,7 +49,7 @@ async def on_message(message):
             await client.send_message(message.channel, retmsg)
 
         if cont.startswith('!store'):
-            print("{} - {}".format(message.author, cont))
+            logging.info("{} - {}".format(message.author, cont))
             if message.attachments:
                 attach = message.attachments[0]
                 if attach['size'] in [572, 540, 532] and attach['filename'].endswith('bin'):
@@ -54,7 +58,7 @@ async def on_message(message):
                         ingest_file(attach, message.author, nick)
                         await client.send_message(message.channel, 'Successfully stored - ' + nick)
                     except Exception as exc:
-                        print(exc)
+                        logging.warning(exc)
                         await client.send_message(message.channel, 'Failed to Submit')
                 else:
                     await client.send_message(message.channel, 'Improper bin size')
@@ -63,7 +67,7 @@ async def on_message(message):
 
 
         if cont.startswith('!send'):
-            print("{} - {}".format(str(message.author), cont))
+            logging.info("{} - {}".format(str(message.author), cont))
             splitlist = cont.split()
             if len(splitlist) < 3:
                 await client.send_message(message.channel, 'Improper send command, please format it like: `!send <@usertag> <amiibonickname>`')
@@ -76,13 +80,12 @@ async def on_message(message):
                     await client.send_file(recipient, filename, filename=sendname)
                     await client.send_message(message.channel, 'Successfully sent {} to {}'.format(to_send, str(recipient)))
                 except Exception as exc:
-                    print(exc)
+                    logging.warning(exc)
                     await client.send_message(message.channel, 'Failed to Send')
-                    raise exc
 
 
         if cont.startswith('!download'):
-            print("{} - {}".format(message.author, cont))
+            logging.info("{} - {}".format(message.author, cont))
             splitlist = cont.split()
             amiiname = '_'.join(splitlist[1:])
             if len(splitlist) == 1:
@@ -93,15 +96,15 @@ async def on_message(message):
                     sendname = str(message.author) + '-' + amiiname + '.bin'
                     await client.send_file(message.author, filename, filename=sendname)
                 except Exception as exc:
-                    print(exc)
+                    logging.warning(exc)
                     await client.send_message(message.channel, 'Failed to Download')
 
 @client.event
 async def on_ready():
-    print('Logged in as')
-    print(client.user.name)
-    print(client.user.id)
-    print('------')
+    logging.info('Logged in as')
+    logging.info(client.user.name)
+    logging.info(client.user.id)
+    logging.info('------')
     os.makedirs('amiibo', exist_ok=True)
 
 

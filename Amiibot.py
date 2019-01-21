@@ -44,6 +44,7 @@ async def on_message(message):
             logging.info("{} - {}".format(message.author, cont))
             retmsg = ("This is the AmiiBot help menu!\n"
                       "`!store <amiibo nickname>` (and attach the bin)\n"
+                      "`!list`\n"
                       "`!send <Tag the host> <amiibo nickname>`\n"
                       "`!download <amiibonickname>`")
             await client.send_message(message.channel, retmsg)

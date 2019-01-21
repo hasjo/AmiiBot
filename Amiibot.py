@@ -59,11 +59,16 @@ async def on_message(message):
             await client.send_message(message.author, retmsg)
 
         if cont.startswith('!delete'):
-            logging.info("{} - {}".format(message.author, cont))
-            splitlist = cont.split()
-            to_del = '_'.join(splitlist[1:])
-            filename = STORAGE_DIR + str(message.author.id) + '-' + to_del + '.bin'
-            os.remove(filename)
+            try:
+                logging.info("{} - {}".format(message.author, cont))
+                splitlist = cont.split()
+                to_del = '_'.join(splitlist[1:])
+                filename = STORAGE_DIR + str(message.author.id) + '-' + to_del + '.bin'
+                os.remove(filename)
+                await client.send_message(message.channel, 'Successfully deleted {}'.format(to_del))
+            except Exception as exc:
+                logging.warning(exc)
+                await client.send_message(message.channel, 'Deletion Failed')
 
         if cont.startswith('!store'):
             logging.info("{} - {}".format(message.author, cont))

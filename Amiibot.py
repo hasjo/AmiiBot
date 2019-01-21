@@ -78,7 +78,7 @@ async def on_message(message):
                 if attach['size'] in [572, 540, 532] and attach['filename'].endswith('bin'):
                     nick = '_'.join(cont.split()[1:])
                     try:
-                        ingest_file(attach, mesamiibo nicknamesage.author, nick)
+                        ingest_file(attach, message.author, nick)
                         await client.send_message(message.channel, 'Successfully stored - ' + nick)
                     except Exception as exc:
                         logging.warning(exc)

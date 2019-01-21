@@ -4,7 +4,7 @@ import asyncio
 import requests
 import creds
 
-STORAGE_DIR = '/amiibo/'
+STORAGE_DIR = 'amiibo/'
 
 client = discord.Client()
 
@@ -43,6 +43,14 @@ async def on_message(message):
                       "`!send <Tag the host> <amiibo nickname>`\n"
                       "`!download <amiibonickname>`")
             await client.send_message(message.channel, retmsg)
+
+        if cont.startswith('!list'):
+            filelist = os.listdir(STORAGE_DIR)
+            amiibolist = [x for x in filelist if x.startswith(str(message.author.id))]
+            namelist = [' '.join(x.split('-')[1:]).replace('.bin', '') for x in amiibolist]
+            retmsg = "Tha amiibo you have stored are:\n" + '\n'.join(namelist)
+            await client.send_message(message.author, retmsg)
+            
 
         if cont.startswith('!store'):
             print("{} - {}".format(message.author, cont))
@@ -102,7 +110,6 @@ async def on_ready():
     print(client.user.name)
     print(client.user.id)
     print('------')
-    os.makedirs('amiibo', exist_ok=True)
 
 
 client.run(creds.GimmeCreds())

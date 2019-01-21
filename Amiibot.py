@@ -32,6 +32,7 @@ def ingest_file(attachobj, username, nickname):
 
 
 
+
 @client.event
 async def on_message(message):
     if message.author == client.user:
@@ -56,7 +57,13 @@ async def on_message(message):
             namelist = [' '.join(x.split('-')[1:]).replace('.bin', '') for x in amiibolist]
             retmsg = "Tha amiibo you have stored are:\n" + '\n'.join(namelist)
             await client.send_message(message.author, retmsg)
-            
+
+        if cont.startswith('!delete'):
+            logging.info("{} - {}".format(message.author, cont))
+            splitlist = cont.split()
+            to_del = '_'.join(splitlist[1:])
+            filename = STORAGE_DIR + str(message.author.id) + '-' + to_del + '.bin'
+            os.remove(filename)
 
         if cont.startswith('!store'):
             logging.info("{} - {}".format(message.author, cont))

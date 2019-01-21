@@ -46,6 +46,7 @@ async def on_message(message):
             retmsg = ("This is the AmiiBot help menu!\n"
                       "`!store <amiibo nickname>` (and attach the bin)\n"
                       "`!list`\n"
+                      "`!delete <amiibo nickname>`\n"
                       "`!send <Tag the host> <amiibo nickname>`\n"
                       "`!download <amiibonickname>`")
             await client.send_message(message.channel, retmsg)
@@ -55,7 +56,7 @@ async def on_message(message):
             filelist = os.listdir(STORAGE_DIR)
             amiibolist = [x for x in filelist if x.startswith(str(message.author.id))]
             namelist = [' '.join(x.split('-')[1:]).replace('.bin', '') for x in amiibolist]
-            retmsg = "Tha amiibo you have stored are:\n" + '\n'.join(namelist)
+            retmsg = "The amiibo you have stored are:\n" + '\n'.join(namelist)
             await client.send_message(message.author, retmsg)
 
         if cont.startswith('!delete'):
@@ -77,7 +78,7 @@ async def on_message(message):
                 if attach['size'] in [572, 540, 532] and attach['filename'].endswith('bin'):
                     nick = '_'.join(cont.split()[1:])
                     try:
-                        ingest_file(attach, message.author, nick)
+                        ingest_file(attach, mesamiibo nicknamesage.author, nick)
                         await client.send_message(message.channel, 'Successfully stored - ' + nick)
                     except Exception as exc:
                         logging.warning(exc)

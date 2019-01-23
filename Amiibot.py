@@ -82,7 +82,7 @@ async def on_message(message):
                         await client.send_message(message.channel, 'Successfully stored - ' + nick)
                     except Exception as exc:
                         logging.warning(exc)
-                        await client.send_message(message.channel, 'Failed to Submit')
+                        await client.send_message(message.channel, 'Failed to Store')
                 else:
                     await client.send_message(message.channel, 'Improper bin size')
             else:
@@ -104,7 +104,12 @@ async def on_message(message):
                     await client.send_message(message.channel, 'Successfully sent {} to {}'.format(to_send, str(recipient)))
                 except Exception as exc:
                     logging.warning(exc)
-                    await client.send_message(message.channel, 'Failed to Send')
+                    if 'Cannot send messages to this user' in str(exc):
+                        await client.send_message(message.channel, 'Cannot send messages to this user, they may have DMs turned off')
+                    elif 'No such file or directory' in str(exc):
+                        await client.send_message(message.channel, 'File does not exist, make sure your spelling is correct')
+                    else:
+                        await client.send_message(message.channel, 'Failed to Send')
 
 
         if cont.startswith('!download'):
@@ -120,7 +125,10 @@ async def on_message(message):
                     await client.send_file(message.author, filename, filename=sendname)
                 except Exception as exc:
                     logging.warning(exc)
-                    await client.send_message(message.channel, 'Failed to Download')
+                    if 'No such file or directory' in str(exc):
+                        await client.send_message(message.channel, 'File does not exist, make sure your spelling is correct')
+                    else:
+                        await client.send_message(message.channel, 'Failed to Download')
 
 @client.event
 async def on_ready():

@@ -56,7 +56,7 @@ async def on_message(message):
             logging.info("{} - {}".format(message.author, cont))
             filelist = os.listdir(STORAGE_DIR)
             amiibolist = [x for x in filelist if x.startswith(str(message.author.id))]
-            namelist = [' '.join(x.split('-')[1:]).replace('.bin', '') for x in amiibolist]
+            namelist = [' '.join(x.split('_')[1:]).replace('.bin', '') for x in amiibolist]
             retmsg = "The amiibo you have stored are:\n" + '\n'.join(namelist)
             await client.send_message(message.author, retmsg)
 

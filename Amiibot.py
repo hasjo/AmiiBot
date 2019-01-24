@@ -46,6 +46,7 @@ async def on_message(message):
             retmsg = ("This is the AmiiBot help menu!\n"
                       "`!store <amiibo nickname>` (and attach the bin)\n"
                       "`!list`\n"
+                      "`!rename <old amiibo nickname>, <new amiibo nickname>`\n"
                       "`!delete <amiibo nickname>`\n"
                       "`!send <Tag the host> <amiibo nickname>`\n"
                       "`!download <amiibonickname>`")
@@ -70,6 +71,27 @@ async def on_message(message):
             except Exception as exc:
                 logging.warning(exc)
                 await client.send_message(message.channel, 'Deletion Failed')
+
+        if cont.startswith('!rename'):
+            try:
+                logging.info("{} - {}".format(message.author, cont))
+                arglist = cont.split()[1:]
+                argstring = ' '.join(arglist)
+                oldname, newname = ['_'.join(x.strip().split()) for x in argstring.split(',')]
+                oldfilename = STORAGE_DIR + str(message.author.id) + '-' + oldname + '.bin'
+                newfilename = STORAGE_DIR + str(message.author.id) + '-' + newname + '.bin'
+                os.rename(oldfilename, newfilename)
+                await client.send_message(message.channel, 'Successfully renamed {} to {}'.format(oldname, newname))
+            except Exception as exc:
+                logging.warning(exc)
+                if 'No such file or directory' in str(exc):
+                    await client.send_message(message.channel, 'File does not exist, make sure your spelling is correct')
+                elif 'not enough values to unpack' in str(exc):
+                    await client.send_message(message.channel, 'Not enough names provided, should be comma separated')
+                elif 'too many values to unpack'in str(exc):
+                    await client.send_message(message.channel, 'Too many names provided, calm down')
+                else:
+                    await client.send_message(message.channel, 'Failed to rename')
 
         if cont.startswith('!store'):
             logging.info("{} - {}".format(message.author, cont))

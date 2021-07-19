@@ -3,19 +3,17 @@ import logging
 import os
 import discord
 import requests
-import creds
 
-STORAGE_DIR = '/amiibo/'
+STORAGE_DIR = '.\amiibo'
 logging.basicConfig(format='%(levelname)s:%(message)s',
-                    filename=STORAGE_DIR+'log.log',
                     level=logging.INFO)
 
 client = discord.Client()
 
-def ingest_file(attachobj, username, nickname):
-    filesize = attachobj['size']
-    filename = attachobj['filename']
-    url = attachobj['url']
+def ingest_file(username, nickname):
+    filesize = discord.Attachment.size
+    filename = discord.Attachment.filename
+    url = discord.Attachment.url
     reqobj = requests.get(url, stream=True)
     filename = STORAGE_DIR + str(username.id) + '-' + nickname + '.bin'
     outstring = b''
@@ -50,7 +48,7 @@ async def on_message(message):
                       "`!delete <amiibo nickname>`\n"
                       "`!send <Tag the host> <amiibo nickname>`\n"
                       "`!download <amiibonickname>`")
-            await client.send_message(message.channel, retmsg)
+            await message.channel.send(retmsg)
 
         if cont.startswith('!list'):
             logging.info("{} - {}".format(message.author, cont))
@@ -59,7 +57,7 @@ async def on_message(message):
             namelist = ['-'.join(x.split('-')[1:]).replace('.bin', '') for x in amiibolist]
             print(namelist)
             retmsg = "The amiibo you have stored are:\n" + '\n'.join(namelist)
-            await client.send_message(message.author, retmsg)
+            await message.channel.send(retmsg)
 
         if cont.startswith('!delete'):
             try:
@@ -68,7 +66,7 @@ async def on_message(message):
                 to_del = '_'.join(splitlist[1:])
                 filename = STORAGE_DIR + str(message.author.id) + '-' + to_del + '.bin'
                 os.remove(filename)
-                await client.send_message(message.channel, 'Successfully deleted {}'.format(to_del))
+                await message.channel.send('Successfully deleted {}'.format(to_del))
             except Exception as exc:
                 logging.warning(exc)
                 await client.send_message(message.channel, 'Deletion Failed')
@@ -96,20 +94,16 @@ async def on_message(message):
 
         if cont.startswith('!store'):
             logging.info("{} - {}".format(message.author, cont))
-            if message.attachments:
-                attach = message.attachments[0]
-                if attach['size'] in [572, 540, 532] and attach['filename'].endswith('bin'):
-                    nick = '_'.join(cont.split()[1:])
-                    try:
-                        ingest_file(attach, message.author, nick)
-                        await client.send_message(message.channel, 'Successfully stored - ' + nick)
-                    except Exception as exc:
-                        logging.warning(exc)
-                        await client.send_message(message.channel, 'Failed to Store')
-                else:
-                    await client.send_message(message.channel, 'Improper bin size')
+            if discord.Attachment.size != 540:      #and message.Attachment.url.endswith('bin')
+                nick = '_'.join(cont.split()[1:])
+                try:
+                    ingest_file(message.author, nick)
+                    await message.channel.send('Successfully stored - ' + nick)
+                except Exception as exc:
+                    logging.warning(exc)
+                    await message.channel.send('Failed to Store')
             else:
-                await client.send_message(message.channel, 'No files attached, you must attach a file to submit it.')
+                await message.channel.send('Improper bin size')
 
 
         if cont.startswith('!send'):
@@ -161,4 +155,4 @@ async def on_ready():
     logging.info('------')
 
 
-client.run(creds.GimmeCreds())
+client.run('TOKEN')

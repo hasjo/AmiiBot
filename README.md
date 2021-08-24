@@ -1,2 +1,2 @@
 # AmiiBot
-A Discord bot to handle amiibo files for smash bros
+A WIP Discord bot for use in sending amiibo .bin files to tournaments.

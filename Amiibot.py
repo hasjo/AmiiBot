@@ -98,17 +98,18 @@ async def store_cmd(ctx, nick):
 
 
 @bot.command(name="send")
-async def send(ctx, to_send):
+async def send(ctx, userid, to_send):
     logging.info("{} - {}".format(ctx.author, ctx.message))
     try:
-            recipient = ctx.message.mentions[0]
-            filename = STORAGE_DIR + str(ctx.author.id) + "-" + amiiname + ".bin"
-            sendname = STORAGE_DIR + amiiname + ".bin"
+            user = ctx.message.mentions[0]
+            print(user)
+            filename = STORAGE_DIR + str(ctx.author.id) + "-" + to_send + ".bin"
+            sendname = STORAGE_DIR + to_send + ".bin"
             os.rename(filename, sendname)
-            await ctx.send(file=File(sendname))
+            await user.send(file=File(sendname))
             os.rename(sendname, filename)
             await ctx.send(
-                "Successfully sent {} to {}".format(to_send, str(recipient)),
+                "Successfully sent {} to {}".format(to_send, str(user)),
             )
     except Exception as exc:
             logging.warning(exc)
